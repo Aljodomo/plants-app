@@ -19,6 +19,23 @@
       ]
     }
   ],
+  "hosting": {
+    "public": "hosting/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "predeploy": [
+      "npm --prefix \"hosting\" run build"
+    ]
+  },
   "emulators": {
     "functions": {
       "port": 5001
@@ -33,13 +50,5 @@
       "enabled": true
     },
     "singleProjectMode": true
-  },
-  "hosting": {
-    "public": "public",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
   }
 }
