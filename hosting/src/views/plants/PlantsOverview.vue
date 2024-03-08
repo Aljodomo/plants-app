@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { onUnmounted } from 'vue'
+import { computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAllPlantsRef } from '../plantsRepo'
 
 const router = useRouter()
 
 const { plantsRef, unsub } = await getAllPlantsRef()
+
+const sortedPlants = computed(() => {
+  return plantsRef.value.slice().sort((a, b) => a.name > b.name ? 1 : -1)
+})
 
 onUnmounted(() => {
   unsub()
@@ -35,7 +39,7 @@ function goToNewPlantPage() {
         <p class="text-f-green font-bold">Pflanze anlegen</p>
       </div>
       <div
-        v-for="plant of plantsRef"
+        v-for="plant of sortedPlants"
         :key="plant.id"
         class="bg-f-green rounded-xl p-4 h-32"
         @click="goToPlantPage(plant.id)"
