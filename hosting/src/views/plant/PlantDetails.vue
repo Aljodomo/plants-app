@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { findPlantRef, savePlantInfo, tanslateHumidity } from '../plantsRepo'
+import { useRoute, useRouter } from 'vue-router'
+import { deletePlant, findPlantRef, savePlantInfo, tanslateHumidity } from '../plantsRepo'
 
 const route = useRoute()
+const router = useRouter()
+
 const plantId = route.params.id as string
 
 const { ref: plantInfo, unsub } = await findPlantRef(plantId)
@@ -53,11 +55,20 @@ const nonWaterVisits = computed(() => {
     .reverse()
     .filter((visit) => visit.wasWatered === false)
 })
+
+function handleDelete() {
+  const confirmed = confirm(`Möchtest du die Pflanze ${plantInfo.value.name} wirklich löschen?`)
+
+  if(confirmed) {
+    deletePlant(plantId)
+    router.push("/plants")
+  }
+}
 </script>
 
 <template>
-  <div class="bg-f-green mx-8 mt-8 flex-1 rounded-3xl" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0">
-    <main class="flex flex-col items-center justify-center p-8 text-[#FDF4E2]">
+  <div class="bg-f-green mx-8 mt-8 min-h-full rounded-3xl" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0">
+    <main class="flex flex-col items-center justify-center p-8 text-f-beige">
       <p>Nickname</p>
       <textarea
         class="text-5xl bg-transparent text-center"
@@ -102,6 +113,7 @@ const nonWaterVisits = computed(() => {
       </div>
     </main>
   </div>
+  <button class="bg-red-600 p-4 mx-8 text-xl font-bold text-center text-f-beige" @click="handleDelete">Löschen</button>
 </template>
 
 <style></style>

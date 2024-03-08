@@ -7,7 +7,8 @@ import {
   arrayUnion,
   setDoc,
   collection,
-  type Unsubscribe
+  type Unsubscribe,
+  deleteDoc
 } from 'firebase/firestore'
 import { ref } from 'vue'
 import { firestore } from './firestore'
@@ -221,4 +222,9 @@ export async function addVisit(plantId: string) {
 
     return visitId
   }
+}
+
+export async function deletePlant(plantId: string) {
+  const docRef = doc(firestore, plantColName, plantId)
+  await deleteDoc(docRef)
 }
