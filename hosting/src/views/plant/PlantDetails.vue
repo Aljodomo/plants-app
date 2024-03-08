@@ -19,7 +19,7 @@ function format(date: Date): string {
     ' - ' +
     timeZoneDate.getHours() +
     ':' +
-    timeZoneDate.getMinutes()
+    (timeZoneDate.getMinutes() < 10 ? "0" : "") + timeZoneDate.getMinutes()
   )
 }
 
