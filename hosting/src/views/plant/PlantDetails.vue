@@ -2,7 +2,9 @@
 import { computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { deletePlant, findPlantRef, savePlantInfo, tanslateHumidity } from '../plantsRepo'
-import { format } from "../dateUtils"
+import { format, date, timezoned } from '../dateUtils'
+import { Timestamp } from 'firebase/firestore'
+import { wateringUrgencyColor } from '../wateringInfoColors'
 
 const route = useRoute()
 const router = useRouter()
@@ -47,17 +49,40 @@ const nonWaterVisits = computed(() => {
 function handleDelete() {
   const confirmed = confirm(`Möchtest du die Pflanze ${plantInfo.value.name} wirklich löschen?`)
 
-  if(confirmed) {
+  if (confirmed) {
     deletePlant(plantId)
-    router.push("/plants")
+    router.push('/plants')
   }
 }
+
+const daysRemaingToWater = computed(() => {
+  const now = Timestamp.now()
+
+  if (now.seconds > plantInfo.value.nextWatering!.seconds) {
+    return 0
+  }
+
+  const delta = plantInfo.value.nextWatering!.seconds - now.seconds
+
+  return Math.floor(delta / 60 / 60 / 24)
+})
 </script>
 
 <template>
-  <div class="bg-f-green mx-8 mt-8 min-h-full rounded-3xl" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0">
-    <main class="flex flex-col items-center justify-center p-8 text-f-beige">
-      <p>Nickname</p>
+  <div
+    class="px-8 pt-8"
+    :style="{
+      'background-image': `linear-gradient(to left bottom, ${wateringUrgencyColor(plantInfo)}, rgba(255,0,0,0) 50%)`
+    }"
+  >
+    <main
+      class="flex flex-col items-center justify-center p-8 text-f-beige rounded-3xl bg-f-green"
+      :style="{
+        'border-bottom-left-radius': 0,
+        'border-bottom-right-radius': 0
+      }"
+    >
+      <p>Spitzname</p>
       <textarea
         class="text-5xl bg-transparent text-center"
         style="max-width: 100%"
@@ -65,25 +90,18 @@ function handleDelete() {
         @focus="($event.target as any).select()"
         @keyup="save"
       ></textarea>
-      <div class="flex flex-col justify-center self-start pl-2">
-        <p>Gießen</p>
+      <div v-if="plantInfo.nextWatering" class="flex flex-col justify-center self-start pl-2">
+        <p>Gießen am</p>
         <p class="text-2xl mt-2">
-          Alle
-          <input
-            type="number"
-            class="bg-transparent text-3xl box-border w-10 text-center"
-            v-model="plantInfo.wateringInterval"
-            @focus="($event.target as any).select()"
-            @input="save"
-          />
-          Tage
+          <span>{{ date(timezoned(plantInfo.nextWatering.toDate())) }}</span>
+          <span class="text-sm"> ({{ daysRemaingToWater }} Tag/e verbleibend)</span>
         </p>
       </div>
       <div class="mt-8 flex flex-col justify-center self-start pl-2 gap-8">
         <div v-if="waterVisits.length">
           <div>Gegossen am</div>
           <ul>
-            <li v-for="visit of waterVisits" :key="visit.id" class="text-4xl mt-2">
+            <li v-for="visit of waterVisits" :key="visit.id" class="text-2xl mt-2">
               {{ format(visit.timestamp.toDate()) }}
               <p class="text-xs">Der Boden war {{ tanslateHumidity(visit.soilHumidity) }}</p>
             </li>
@@ -92,7 +110,7 @@ function handleDelete() {
         <div v-if="nonWaterVisits.length">
           <div>Bodenfeuchtigkeit geprüft am</div>
           <ul>
-            <li v-for="visit of nonWaterVisits" :key="visit.id" class="text-4xl mt-2">
+            <li v-for="visit of nonWaterVisits" :key="visit.id" class="text-2xl mt-2">
               {{ format(visit.timestamp.toDate()) }}
               <p class="text-xs">Der Boden war {{ tanslateHumidity(visit.soilHumidity) }}</p>
             </li>
@@ -101,7 +119,12 @@ function handleDelete() {
       </div>
     </main>
   </div>
-  <button class="bg-red-600 p-4 mx-8 text-xl font-bold text-center text-f-beige" @click="handleDelete">Löschen</button>
+  <button
+    class="bg-red-600 p-4 mx-8 text-xl font-bold text-center text-f-beige"
+    @click="handleDelete"
+  >
+    Löschen
+  </button>
 </template>
 
 <style></style>
