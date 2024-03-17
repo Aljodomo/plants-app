@@ -34,7 +34,8 @@ export interface PlantInfo {
   id: string
   name: string
   wateringInterval: string
-  visits: Visit[]
+  visits: Visit[],
+  nextWatering?: Timestamp
 }
 
 export async function findPlantRef(plantId: string) {

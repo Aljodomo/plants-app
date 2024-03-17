@@ -2,13 +2,24 @@
 import { computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAllPlantsRef } from '../plantsRepo'
+import { date, timezoned } from '../dateUtils'
+import { wateringUrgencyColor } from '../wateringInfoColors'
 
 const router = useRouter()
 
 const { plantsRef, unsub } = await getAllPlantsRef()
 
 const sortedPlants = computed(() => {
-  return plantsRef.value.slice().sort((a, b) => a.name > b.name ? 1 : -1)
+  return plantsRef.value.slice().sort((a, b) => {
+    if (!a.nextWatering) {
+      return 1
+    }
+    if (!b.nextWatering) {
+      return -1
+    }
+
+    return a.nextWatering.seconds - b.nextWatering.seconds
+  })
 })
 
 onUnmounted(() => {
@@ -41,10 +52,19 @@ function goToNewPlantPage() {
       <div
         v-for="plant of sortedPlants"
         :key="plant.id"
-        class="bg-f-green rounded-xl p-4 h-32"
+        class="bg-f-green rounded-xl p-4 h-32 flex flex-col justify-between"
+        :style="{
+          'background-image': `linear-gradient(to left bottom, ${wateringUrgencyColor(plant)}, rgba(255,0,0,0) 50%)`
+        }"
         @click="goToPlantPage(plant.id)"
       >
-        {{ plant.name }}
+        <div>{{ plant.name }}</div>
+        <div v-if="plant.nextWatering" class="w-full flex flex-col items-end">
+          <div>
+            <p class="text-sm">Gießen am</p>
+            <p>{{ date(timezoned(plant.nextWatering.toDate())) }}</p>
+          </div>
+        </div>
       </div>
     </div>
   </main>
