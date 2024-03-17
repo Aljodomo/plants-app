@@ -17,5 +17,9 @@ export function timezoned(date: Date): Date {
 }
 
 export function date(date: Date): string {
-  return `${date.getDate()}.${date.getMonth() + 1}`
+  return `${leadingZero(date.getDate())}.${leadingZero(date.getMonth() + 1)}`
+}
+
+function leadingZero(n: number): string {
+  return (n < 10 ? '0' : '') + n.toString()
 }
