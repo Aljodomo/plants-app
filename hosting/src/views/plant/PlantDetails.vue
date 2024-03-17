@@ -2,6 +2,7 @@
 import { computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { deletePlant, findPlantRef, savePlantInfo, tanslateHumidity } from '../plantsRepo'
+import { format } from "../dateUtils"
 
 const route = useRoute()
 const router = useRouter()
@@ -9,19 +10,6 @@ const router = useRouter()
 const plantId = route.params.id as string
 
 const { ref: plantInfo, unsub } = await findPlantRef(plantId)
-
-function format(date: Date): string {
-  const timeZoneDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
-  return (
-    timeZoneDate.getDate() +
-    '.' +
-    (timeZoneDate.getMonth() + 1) +
-    ' - ' +
-    timeZoneDate.getHours() +
-    ':' +
-    (timeZoneDate.getMinutes() < 10 ? "0" : "") + timeZoneDate.getMinutes()
-  )
-}
 
 let timeout: number | null = null
 
