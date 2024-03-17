@@ -1,7 +1,7 @@
 import * as logger from "firebase-functions/logger";
 import {onSchedule} from "firebase-functions/v2/scheduler";
 import {initializeApp} from "firebase-admin/app";
-import {Timestamp} from "firebase-admin/firestore";
+import {Timestamp, getFirestore} from "firebase-admin/firestore";
 import axios from "axios";
 import {defineString} from "firebase-functions/params";
 
@@ -24,11 +24,11 @@ export interface Visit {
 }
 
 export interface PlantInfo {
+  id: string,
   name: string;
-  telegramChatId: string;
   wateringInterval: string;
   visits: Visit[];
-  wateringTimestamps: Timestamp[];
+  nextWatering: Timestamp;
 }
 
 /**
@@ -37,7 +37,7 @@ export interface PlantInfo {
  * trafers waterings in list from back
  * get watering
  * is last element in list?
- *    go to next watering
+ *    go to next waterin
  * get next visit from watering forward
  * is last element in list?
  * switch humidity
@@ -56,9 +56,26 @@ export interface PlantInfo {
 export const wateringReminder = onSchedule("every day 08:00", async () => {
   logger.info("Checking for watering reminders");
 
-  // const plantsCol = await getFirestore().collection("plants").get();
+  const plantsCol = await getFirestore().collection("plants").get();
 
-  // for (const docSnap of plantsCol.docs) {
+  await Promise.all(plantsCol.docs.map(async (docSnap) => {
+    const doc = docSnap.data() as PlantInfo;
+
+    const waterings = doc.visits.filter((visit) => visit.wasWatered === true);
+
+    if (waterings.length >= 2) {
+      const lastWateringMillis = waterings[waterings.length - 1].timestamp.toMillis();
+      const secondLastWateringMillis = waterings[waterings.length - 2].timestamp.toMillis();
+      const millisBetweenLastWaterings = lastWateringMillis - secondLastWateringMillis;
+
+      const nextWatering = Timestamp.fromMillis(lastWateringMillis + millisBetweenLastWaterings);
+
+      await docSnap.ref.update({
+        nextWatering: nextWatering,
+      });
+    }
+  }));
+
   //   const docId = docSnap.id;
   //   const doc = docSnap.data() as PlantInfo;
 
