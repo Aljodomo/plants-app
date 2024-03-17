@@ -20,15 +20,15 @@ export interface Visit {
   id: string;
   timestamp: Timestamp;
   wasWatered: boolean;
-  soilHumidity: Humidity | null;
+  soilHumidity: Humidity;
 }
 
 export interface PlantInfo {
-  id: string,
+  id: string;
   name: string;
   wateringInterval: string;
   visits: Visit[];
-  nextWatering: Timestamp;
+  nextWatering?: Timestamp;
 }
 
 /**
@@ -53,28 +53,55 @@ export interface PlantInfo {
  *
  * interval between wet and dry
  */
-export const wateringReminder = onSchedule("every day 08:00", async () => {
+export const wateringReminder = onSchedule("* 3 * * *", async () => {
   logger.info("Checking for watering reminders");
 
   const plantsCol = await getFirestore().collection("plants").get();
 
-  await Promise.all(plantsCol.docs.map(async (docSnap) => {
-    const doc = docSnap.data() as PlantInfo;
+  await Promise.all(
+    plantsCol.docs.map(async (docSnap) => {
+      const doc = docSnap.data() as PlantInfo;
 
-    const waterings = doc.visits.filter((visit) => visit.wasWatered === true);
+      const waterings = doc.visits.filter((visit) => visit.wasWatered === true);
 
-    if (waterings.length >= 2) {
-      const lastWateringMillis = waterings[waterings.length - 1].timestamp.toMillis();
-      const secondLastWateringMillis = waterings[waterings.length - 2].timestamp.toMillis();
-      const millisBetweenLastWaterings = lastWateringMillis - secondLastWateringMillis;
+      if (waterings.length >= 2) {
+        const lastWateringMillis =
+          waterings[waterings.length - 1].timestamp.toMillis();
+        const secondLastWateringMillis =
+          waterings[waterings.length - 2].timestamp.toMillis();
+        const millisBetweenLastWaterings =
+          lastWateringMillis - secondLastWateringMillis;
 
-      const nextWatering = Timestamp.fromMillis(lastWateringMillis + millisBetweenLastWaterings);
+        let nextWatering = Timestamp.fromMillis(
+          lastWateringMillis + millisBetweenLastWaterings
+        );
 
-      await docSnap.ref.update({
-        nextWatering: nextWatering,
-      });
-    }
-  }));
+        const now = Timestamp.now();
+
+        if (nextWatering.seconds < now.seconds) {
+          const moistCheck = doc.visits
+            .filter((vis) => vis.wasWatered === false)
+            .filter(
+              (vis) =>
+                vis.timestamp.seconds > nextWatering.seconds &&
+                [Humidity.MOIST, Humidity.WET].includes(vis.soilHumidity!)
+            )
+            .sort((a, b) => a.timestamp.seconds - b.timestamp.seconds)
+            .at(0);
+
+          if (moistCheck) {
+            nextWatering = Timestamp.fromMillis(
+              moistCheck.timestamp.toMillis() + 1000 * 60 * 60 * 24 * 2
+            );
+          }
+        }
+
+        await docSnap.ref.update({
+          nextWatering: nextWatering,
+        });
+      }
+    })
+  );
 
   //   const docId = docSnap.id;
   //   const doc = docSnap.data() as PlantInfo;
