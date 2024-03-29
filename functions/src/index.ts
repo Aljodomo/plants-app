@@ -7,7 +7,7 @@ import {defineString} from "firebase-functions/params";
 
 initializeApp();
 
-// const DEFAULT_TELEGRAM_CHAT_ID = defineString("DEFAULT_TELEGRAM_CHAT_ID");
+const DEFAULT_TELEGRAM_CHAT_ID = defineString("DEFAULT_TELEGRAM_CHAT_ID");
 
 export enum Humidity {
   WET = "WET",
@@ -26,10 +26,11 @@ export interface Visit {
 export interface PlantInfo {
   id: string;
   name: string;
-  wateringInterval: string;
+  preferedHumidy?: Humidity
   visits: Visit[];
   nextWatering?: Timestamp;
 }
+
 
 /**
  * if list contains no watering do nothing
@@ -78,6 +79,7 @@ export const wateringReminder = onSchedule("* 3 * * *", async () => {
 
         const now = Timestamp.now();
 
+        // Should have already been watered
         if (nextWatering.seconds < now.seconds) {
           const moistCheck = doc.visits
             .filter((vis) => vis.wasWatered === false)
@@ -96,9 +98,19 @@ export const wateringReminder = onSchedule("* 3 * * *", async () => {
           }
         }
 
-        await docSnap.ref.update({
-          nextWatering: nextWatering,
-        });
+        const promises = []
+
+        if(nextWatering.seconds < now.seconds) {
+          promises.push(sendTelegramMessage(DEFAULT_TELEGRAM_CHAT_ID.value(), `Du solltest "${doc.name}" gießen.`))
+        }
+
+        if(doc.nextWatering !== nextWatering) {
+          promises.push(docSnap.ref.update({
+            nextWatering: nextWatering,
+          }));
+        }
+
+        await Promise.all(promises)
       }
     })
   );
