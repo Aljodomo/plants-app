@@ -1,10 +1,10 @@
 import {initializeApp} from "firebase-admin/app";
-import {Timestamp} from "firebase-admin/firestore";
+import {Timestamp, getFirestore} from "firebase-admin/firestore";
 import axios from "axios";
 import {defineString} from "firebase-functions/params";
-import {
-  onDocumentUpdated,
-} from "firebase-functions/v2/firestore";
+import {onDocumentUpdated} from "firebase-functions/v2/firestore";
+import {onSchedule} from "firebase-functions/v2/scheduler";
+import * as logger from "firebase-functions/logger";
 
 initializeApp();
 
@@ -146,13 +146,39 @@ function predictNextWatering(plant: PlantInfo): Timestamp | null {
   return nextWatering;
 }
 
+export const wateringNotifications = onSchedule("* 3 * * *", async () => {
+  const plantsCol = await getFirestore().collection("plants").get();
+
+  logger.info("running notifications");
+
+  await Promise.all(
+    plantsCol.docs.map(async (docSnap) => {
+      logger.info("running notifications for " + docSnap.id);
+
+      const doc = docSnap.data() as PlantInfo;
+
+      if (
+        doc.nextWatering !== undefined &&
+        doc.nextWatering.seconds < Timestamp.now().seconds
+      ) {
+        await sendTelegramMessage(
+          DEFAULT_TELEGRAM_CHAT_ID.value(),
+          `Du solltest "${doc.name}" gießen.`
+        );
+      } else {
+        logger.info("Skipping telegram notification for plantId: " + doc.id);
+      }
+    })
+  );
+});
+
 const TELEGRAM_API_KEY = defineString("TELEGRAM_API_KEY");
 
 export async function sendTelegramMessage(
   chatId: string,
   text: string
 ): Promise<void> {
-  const botApiKey = TELEGRAM_API_KEY;
+  const botApiKey = TELEGRAM_API_KEY.value();
   const sendMessageUrl = `https://api.telegram.org/bot${botApiKey}/sendMessage`;
   const body = {chat_id: chatId, text: text};
   await axios
@@ -161,6 +187,6 @@ export async function sendTelegramMessage(
       console.log(`Telegram /sendMessage response statusCode: ${res.status}`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(error);
     });
 }
