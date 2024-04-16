@@ -69,16 +69,11 @@ export const onPlantUpdated = onDocumentUpdated(
     }
 
     const plantAfter = snapshotAfter.data() as PlantInfo;
-    const plantBefore = snapshotBefore.data() as PlantInfo;
-
-    if (plantBefore.visits.length === plantAfter.visits.length) {
-      logger.log("No new visits. Skipping nextWatering calculation");
-      return;
-    }
 
     const nextWatering: Timestamp | null = predictNextWatering(plantAfter);
 
     if (!nextWatering) {
+      logger.info("Could not calculate nextWatering");
       return;
     }
 
@@ -90,44 +85,130 @@ export const onPlantUpdated = onDocumentUpdated(
   }
 );
 
+function calcHumidityDelta(
+  humidity: Humidity,
+  preferedHumidy: Humidity | undefined
+) {
+  if (preferedHumidy === undefined) {
+    return 0;
+  }
+  const humidityOrder = [
+    Humidity.WET,
+    Humidity.MOIST,
+    Humidity.DRY,
+    Humidity.VERY_DRY,
+  ];
+  const prefIndex = humidityOrder.indexOf(preferedHumidy);
+  const actualIndex = humidityOrder.indexOf(humidity);
+  return prefIndex - actualIndex;
+}
+
+function calcTimeDeltaAvg(
+  waterings: Visit[],
+  weightModifier: (v: Visit) => number
+): number {
+  let weightedAverage = 0;
+  let totalWeight = 0;
+
+  for (let i = 0; i < waterings.length - 1; i++) {
+    const j = i + 1;
+    const first = waterings[i];
+    const second = waterings[j];
+
+    // time
+    const timeDelta = second.timestamp.toMillis() - first.timestamp.toMillis();
+
+    // weight
+    const deltaCount = waterings.length - 1;
+    // large number = the recent values are more important
+    // 0 = weight always 1
+    const lambda = 0.5;
+    const expoWeight = Math.exp(-lambda * (deltaCount - i - 1));
+
+    const weight = expoWeight * weightModifier(second);
+
+    totalWeight += weight;
+    weightedAverage += timeDelta * weight;
+  }
+
+  return weightedAverage / totalWeight;
+}
+
 function predictNextWatering(plant: PlantInfo): Timestamp | null {
   let nextWatering: Timestamp | null = null;
 
   const waterings = plant.visits.filter((visit) => visit.wasWatered === true);
 
-  if (waterings.length >= 2) {
-    const lastWateringMillis =
-      waterings[waterings.length - 1].timestamp.toMillis();
-    const secondLastWateringMillis =
-      waterings[waterings.length - 2].timestamp.toMillis();
-    const millisBetweenLastWaterings =
-      lastWateringMillis - secondLastWateringMillis;
+  if (waterings.length < 2) {
+    logger.info(
+      "Skipping nextWaterPrediction because there are not enough waterings: " +
+        waterings.length
+    );
+    return nextWatering;
+  }
 
-    nextWatering = Timestamp.fromMillis(
-      lastWateringMillis + millisBetweenLastWaterings
+  const avg = calcTimeDeltaAvg(
+    waterings,
+    // weight visits less which did not water the plant at the prefered soil humidity
+    (v) => 1 / 1 + calcHumidityDelta(v.soilHumidity, plant.preferedHumidy)
+  );
+
+  nextWatering = Timestamp.fromMillis(
+    waterings.at(-1)!.timestamp.toMillis() + avg
+  );
+
+  logger.debug(
+    "nextWatering based on last waterings alone: " +
+      nextWatering.toDate().toString()
+  );
+
+  const now = Timestamp.now();
+
+  // "Smart" logic to take humidity checks into account
+  if (
+    nextWatering.seconds < now.seconds &&
+    plant.preferedHumidy !== undefined
+  ) {
+    const lastHumidityCheck = plant.visits
+      .filter((vis) => vis.wasWatered === false)
+      .filter(
+        (vis) =>
+          // Take only checks after the nextWatering time into account
+          vis.timestamp.seconds > nextWatering!.seconds
+      )
+      .at(-1);
+
+    logger.debug(
+      "Using smart logic. Last humidity check: " +
+        lastHumidityCheck?.timestamp.toDate().toString()
     );
 
-    const now = Timestamp.now();
+    if (lastHumidityCheck !== undefined) {
+      const humidityDelta = calcHumidityDelta(
+        lastHumidityCheck.soilHumidity,
+        plant.preferedHumidy
+      );
 
-    // Should have already been watered
-    if (nextWatering.seconds < now.seconds) {
-      const moistCheck = plant.visits
-        .filter((vis) => vis.wasWatered === false)
-        .filter(
-          (vis) =>
-            vis.timestamp.seconds > nextWatering!.seconds &&
-            [Humidity.MOIST, Humidity.WET].includes(vis.soilHumidity)
-        )
-        .sort((a, b) => a.timestamp.seconds - b.timestamp.seconds)
-        .at(0);
-
-      if (moistCheck) {
+      if (humidityDelta > 0) {
         nextWatering = Timestamp.fromMillis(
-          moistCheck.timestamp.toMillis() + 1000 * 60 * 60 * 24 * 2
+          // Add two days for every one delta
+          lastHumidityCheck.timestamp.toMillis() +
+            1000 * 60 * 60 * 24 * 2 * humidityDelta
+        );
+        logger.debug(
+          `Next watering updated based on humidityDelta=(${humidityDelta}): ${nextWatering
+            .toDate()
+            .toString()}`
+        );
+      } else {
+        logger.debug(
+          "Not postponing next watering because soil has already reached prefered humidity level. HumidityDelta: " +
+            humidityDelta
         );
       }
     }
   }
+
   return nextWatering;
 }
 
