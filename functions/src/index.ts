@@ -60,11 +60,11 @@ export const onPlantUpdated = onDocumentUpdated(
     const snapshotAfter = event.data?.after;
     const snapshotBefore = event.data?.before;
     if (!snapshotAfter) {
-      console.error("No data associated after");
+      logger.error("No data associated after");
       return;
     }
     if (!snapshotBefore) {
-      console.error("No data associated before");
+      logger.error("No data associated before");
       return;
     }
 
@@ -72,7 +72,7 @@ export const onPlantUpdated = onDocumentUpdated(
     const plantBefore = snapshotBefore.data() as PlantInfo;
 
     if (plantBefore.visits.length === plantAfter.visits.length) {
-      console.log("No new visits. Skipping nextWatering calculation");
+      logger.log("No new visits. Skipping nextWatering calculation");
       return;
     }
 
@@ -82,26 +82,11 @@ export const onPlantUpdated = onDocumentUpdated(
       return;
     }
 
-    const promises = [];
-
-    if (nextWatering.seconds < Timestamp.now().seconds) {
-      promises.push(
-        sendTelegramMessage(
-          DEFAULT_TELEGRAM_CHAT_ID.value(),
-          `Du solltest "${plantAfter.name}" gießen.`
-        )
-      );
-    }
-
     if (plantAfter.nextWatering !== nextWatering) {
-      promises.push(
-        snapshotAfter.ref.update({
-          nextWatering: nextWatering,
-        })
-      );
+      await snapshotAfter.ref.update({
+        nextWatering: nextWatering,
+      });
     }
-
-    await Promise.all(promises);
   }
 );
 
@@ -184,7 +169,7 @@ export async function sendTelegramMessage(
   await axios
     .post(sendMessageUrl, body)
     .then((res) => {
-      console.log(`Telegram /sendMessage response statusCode: ${res.status}`);
+      logger.log(`Telegram message send with status code: ${res.status}`);
     })
     .catch((error) => {
       logger.error(error);
