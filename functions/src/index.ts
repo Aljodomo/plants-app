@@ -131,7 +131,7 @@ function predictNextWatering(plant: PlantInfo): Timestamp | null {
   return nextWatering;
 }
 
-export const wateringNotifications = onSchedule("* 3 * * *", async () => {
+export const wateringNotifications = onSchedule("0 8 * * *", async () => {
   const plantsCol = await getFirestore().collection("plants").get();
 
   logger.info("running notifications");
