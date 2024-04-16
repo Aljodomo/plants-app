@@ -33,9 +33,9 @@ export interface Visit {
 export interface PlantInfo {
   id: string
   name: string
-  wateringInterval: string
   visits: Visit[],
   nextWatering?: Timestamp
+  preferedHumidy?: Humidity
 }
 
 export async function findPlantRef(plantId: string) {
@@ -59,7 +59,7 @@ export async function findPlantRef(plantId: string) {
   }
 }
 
-export async function createPlant(plantId: string, name: string, wateringInterval: string) {
+export async function createPlant(plantId: string, name: string, preferedHumidy: Humidity) {
   const docRef = doc(firestore, plantColName, plantId)
 
   const docSnap = await getDoc(docRef)
@@ -70,7 +70,7 @@ export async function createPlant(plantId: string, name: string, wateringInterva
     const plantInfo: PlantInfo = {
       id: plantId,
       name: name,
-      wateringInterval: wateringInterval,
+      preferedHumidy: preferedHumidy,
       visits: []
     }
     await setDoc(docRef, plantInfo)
@@ -118,7 +118,7 @@ export async function savePlantInfo(plantId: string, plantInfo: PlantInfo) {
   const docRef = doc(firestore, plantColName, plantId)
   return await updateDoc(docRef, {
     name: plantInfo.name,
-    wateringInterval: plantInfo.wateringInterval
+    preferedHumidy: plantInfo.preferedHumidy
   })
 }
 
@@ -127,11 +127,11 @@ export function tanslateHumidity(humidity: Humidity) {
     case Humidity.WET:
       return 'Nass'
     case Humidity.MOIST:
-      return 'Feucht'
+      return '3cm feucht'
     case Humidity.DRY:
-      return 'Trocken'
+      return '3cm trocken'
     case Humidity.VERY_DRY:
-      return 'Staub trocken'
+      return 'Vollst. abgetrocknet'
   }
 }
 

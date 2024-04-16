@@ -1,8 +1,5 @@
 <template>
-  <form
-    class="flex flex-col items-center justify-center gap-16 p-8"
-    @submit.prevent="handleSubmit"
-  >
+  <form class="flex flex-col items-center justify-center gap-16 p-8" @submit.prevent="handleSubmit">
     <h1 class="text-4xl">Neue Pflanze</h1>
     <div
       class="flex flex-col gap-16 bg-f-green p-8 rounded-xl text-f-beige text-lg"
@@ -20,15 +17,17 @@
         />
       </div>
       <div class="flex flex-col gap-2">
-        <label>Alle wie viele Tage muss die Pflanze gegossen werden?</label>
-        <input
-          v-model="wateringInterval"
+        <label>Wie feucht mag es die Pflanze?</label>
+        <select
+          v-model="preferedHumidyLevel"
           class="text-gray-800"
-          type="number"
-          min="1"
-          max="90"
           required
-        />
+        >
+          <option :value="Humidity.WET">{{ tanslateHumidity(Humidity.WET) }}</option>
+          <option :value="Humidity.MOIST">{{ tanslateHumidity(Humidity.MOIST) }}</option>
+          <option :value="Humidity.DRY">{{ tanslateHumidity(Humidity.DRY) }}</option>
+          <option :value="Humidity.VERY_DRY">{{ tanslateHumidity(Humidity.VERY_DRY) }}</option>
+        </select>
       </div>
     </div>
 
@@ -47,13 +46,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { createPlant } from '../plantsRepo'
+import { Humidity, createPlant, tanslateHumidity } from '../plantsRepo'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 const name = ref('')
-const wateringInterval = ref(14)
+const preferedHumidyLevel = ref(Humidity.DRY)
 const disabled = ref(false)
 const error = ref('')
 
@@ -68,7 +67,7 @@ function handleSubmit() {
 
   const id = 'plant_' + normalize(name.value)
 
-  createPlant(id, name.value, wateringInterval.value + '')
+  createPlant(id, name.value, preferedHumidyLevel.value)
     .then((plantInfo) => {
       router.push('/plants/' + plantInfo.id)
     })

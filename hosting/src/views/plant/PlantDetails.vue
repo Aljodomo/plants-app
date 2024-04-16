@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { deletePlant, findPlantRef, savePlantInfo, tanslateHumidity } from '../plantsRepo'
+import { Humidity, deletePlant, findPlantRef, savePlantInfo, tanslateHumidity } from '../plantsRepo'
 import { format, date, timezoned } from '../dateUtils'
 import { Timestamp } from 'firebase/firestore'
 import { wateringUrgencyColor } from '../wateringInfoColors'
@@ -15,12 +15,17 @@ const { ref: plantInfo, unsub } = await findPlantRef(plantId)
 
 let timeout: number | null = null
 
-async function save() {
+async function save(skipTimeout: boolean = false) {
+  let time = 1000
+  if (skipTimeout === true) {
+    time = 0
+  }
+
   if (timeout) {
     clearTimeout(timeout)
     timeout = null
   }
-  timeout = setTimeout(async () => await savePlantInfo(plantId, plantInfo.value), 1000)
+  timeout = setTimeout(async () => await savePlantInfo(plantId, plantInfo.value), time)
 }
 
 onUnmounted(async () => {
@@ -88,13 +93,24 @@ const daysRemaingToWater = computed(() => {
         style="max-width: 100%"
         v-model="plantInfo.name"
         @focus="($event.target as any).select()"
-        @keyup="save"
+        @keyup="save()"
       ></textarea>
-      <div v-if="plantInfo.nextWatering" class="flex flex-col justify-center self-start pl-2">
+      <div v-if="plantInfo.nextWatering" class="flex flex-col justify-center self-start pl-2 mb-8">
         <p>Gießen am</p>
         <p class="text-2xl mt-2">
           <span>{{ date(timezoned(plantInfo.nextWatering.toDate())) }}</span>
           <span class="text-sm"> ({{ daysRemaingToWater }} Tag/e verbleibend)</span>
+        </p>
+      </div>
+      <div class="flex flex-col justify-center self-start pl-2">
+        <p>Bevorzugte Boden feuchtigkeit</p>
+        <p class="text-2xl mt-2">
+          <select v-model="plantInfo.preferedHumidy" class="text-black" required @change="save(true)">
+            <option :value="Humidity.WET">{{ tanslateHumidity(Humidity.WET) }}</option>
+            <option :value="Humidity.MOIST">{{ tanslateHumidity(Humidity.MOIST) }}</option>
+            <option :value="Humidity.DRY">{{ tanslateHumidity(Humidity.DRY) }}</option>
+            <option :value="Humidity.VERY_DRY">{{ tanslateHumidity(Humidity.VERY_DRY) }}</option>
+          </select>
         </p>
       </div>
       <div class="mt-8 flex flex-col justify-center self-start pl-2 gap-8">
