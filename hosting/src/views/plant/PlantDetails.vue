@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Humidity, deletePlant, findPlantRef, savePlantInfo, tanslateHumidity } from '../plantsRepo'
-import { format, date, timezoned } from '../dateUtils'
+import { deletePlant, findPlantRef, Humidity, savePlantInfo, tanslateHumidity } from '../plantsRepo'
+import { date, format, timezoned } from '../dateUtils'
 import { Timestamp } from 'firebase/firestore'
 import { wateringUrgencyColor } from '../wateringInfoColors'
 
@@ -105,7 +105,12 @@ const daysRemaingToWater = computed(() => {
       <div class="flex flex-col justify-center self-start pl-2">
         <p>Bevorzugte Boden feuchtigkeit</p>
         <p class="text-2xl mt-2">
-          <select v-model="plantInfo.preferedHumidy" class="text-black" required @change="save(true)">
+          <select
+            v-model="plantInfo.preferedHumidy"
+            class="text-black"
+            required
+            @change="save(true)"
+          >
             <option :value="Humidity.WET">{{ tanslateHumidity(Humidity.WET) }}</option>
             <option :value="Humidity.MOIST">{{ tanslateHumidity(Humidity.MOIST) }}</option>
             <option :value="Humidity.DRY">{{ tanslateHumidity(Humidity.DRY) }}</option>

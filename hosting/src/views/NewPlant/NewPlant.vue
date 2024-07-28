@@ -18,11 +18,7 @@
       </div>
       <div class="flex flex-col gap-2">
         <label>Wie feucht mag es die Pflanze?</label>
-        <select
-          v-model="preferedHumidyLevel"
-          class="text-gray-800"
-          required
-        >
+        <select v-model="preferedHumidyLevel" class="text-gray-800" required>
           <option :value="Humidity.WET">{{ tanslateHumidity(Humidity.WET) }}</option>
           <option :value="Humidity.MOIST">{{ tanslateHumidity(Humidity.MOIST) }}</option>
           <option :value="Humidity.DRY">{{ tanslateHumidity(Humidity.DRY) }}</option>
@@ -46,7 +42,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Humidity, createPlant, tanslateHumidity } from '../plantsRepo'
+import { createPlant, Humidity, tanslateHumidity } from '../plantsRepo'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

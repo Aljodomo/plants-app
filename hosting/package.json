@@ -4,20 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "npm run dev",
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "npm run type-check && npm run build-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/",
-    "deploy-preview": "firebase hosting:channel:deploy new-feature --expires 1d"
+    "style": "prettier --write src/",
+    "format": "npm run lint && npm run style",
+    "deploy-preview": "firebase hosting:channel:deploy new-feature --expires 1d",
+    "update-firebase": "npx npm-check-updates firebase -u && npm i"
   },
   "dependencies": {
     "@material/web": "^1.3.0",
     "@types/chroma-js": "^2.4.4",
     "chroma-js": "^2.4.2",
-    "firebase": "^10.8.1",
+    "firebase": "^10.12.4",
     "pinia": "^2.1.7",
     "uuid": "^9.0.1",
     "vue": "^3.4.15",

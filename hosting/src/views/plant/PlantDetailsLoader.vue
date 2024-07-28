@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import PlantDetailsVue from './PlantDetails.vue';
+import PlantDetailsVue from './PlantDetails.vue'
 </script>
-
 
 <template>
   <Suspense>

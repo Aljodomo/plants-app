@@ -9,7 +9,7 @@ import NavBar from './components/nav/NavBar.vue'
       <RouterView v-slot="{ Component }">
         <template v-if="Component">
           <KeepAlive include="PlantsOverviewLoader">
-              <component :is="Component" />
+            <component :is="Component" />
           </KeepAlive>
         </template>
       </RouterView>

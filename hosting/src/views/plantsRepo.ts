@@ -1,14 +1,14 @@
 import {
+  arrayUnion,
+  collection,
+  deleteDoc,
   doc,
   getDoc,
-  updateDoc,
-  Timestamp,
   onSnapshot,
-  arrayUnion,
   setDoc,
-  collection,
+  Timestamp,
   type Unsubscribe,
-  deleteDoc
+  updateDoc
 } from 'firebase/firestore'
 import { ref } from 'vue'
 import { firestore } from './firestore'
@@ -33,7 +33,7 @@ export interface Visit {
 export interface PlantInfo {
   id: string
   name: string
-  visits: Visit[],
+  visits: Visit[]
   nextWatering?: Timestamp
   preferedHumidy?: Humidity
 }
@@ -95,7 +95,10 @@ export async function getAllPlantsRef() {
             break
           }
           case 'removed': {
-            plantsRef.value.splice(plantsRef.value.findIndex((pl) => pl.id === plantInfo.id), 1)
+            plantsRef.value.splice(
+              plantsRef.value.findIndex((pl) => pl.id === plantInfo.id),
+              1
+            )
             break
           }
           case 'modified': {
