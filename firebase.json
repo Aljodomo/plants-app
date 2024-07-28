@@ -33,7 +33,7 @@
       }
     ],
     "predeploy": [
-      "npm --prefix \"hosting\" run build"
+      "echo Run build before deploy!!!!!!!!!"
     ]
   },
   "emulators": {

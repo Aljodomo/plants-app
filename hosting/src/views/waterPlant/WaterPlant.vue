@@ -1,7 +1,5 @@
 <template>
-  <main
-    class="flex-1 flex flex-col items-center justify-center gap-16 text-4xl"
-  >
+  <main class="flex-1 flex flex-col items-center justify-center gap-16 text-4xl">
     <h1
       v-if="plantVisited"
       class="text-4xl bg-green-600 text-center font-bold text-white"
@@ -9,10 +7,7 @@
     >
       Pflanze gegossen!
     </h1>
-    <h1
-      v-else-if="error"
-      class="text-4xl text-center font-bold p-8"
-    >
+    <h1 v-else-if="error" class="text-4xl text-center font-bold p-8">
       Es gab einen Fehler beim gießen... Sorryyy
     </h1>
     <h1 v-else class="text-4xl text-center font-bold p-8">Pflanze wird gegossen...</h1>
@@ -36,7 +31,7 @@ addVisit(plantId)
   .then((visitId) => {
     plantVisited.value = true
     setTimeout(() => {
-        router.push(`/plants/${plantId}/visits/${visitId}/setHumidity`)
+      router.push(`/plants/${plantId}/visits/${visitId}/setHumidity`)
     }, 1000)
   })
   .catch((err) => {
