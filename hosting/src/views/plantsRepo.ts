@@ -240,8 +240,8 @@ export async function removeVisit(plantId: string, visitId: string) {
 
   const { docRef, plantInfo } = await findPlantById(plantId)
 
-  const visitIdx = plantInfo.visits.findIndex(visit => visit.id === visitId)
-  if(visitIdx === -1){
+  const visitIdx = plantInfo.visits.findIndex((visit) => visit.id === visitId)
+  if (visitIdx === -1) {
     throw new Error(`No visit with id ${visitId} found for plant ${plantId}`)
   }
   plantInfo.visits.splice(visitIdx, 1)
@@ -266,4 +266,3 @@ async function findPlantById(plantId: string) {
     throw new Error('No such plant info document id: ' + plantId)
   }
 }
-

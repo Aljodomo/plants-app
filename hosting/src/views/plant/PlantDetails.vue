@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { deletePlant, findPlantRef, Humidity, removeVisit, savePlantInfo, tanslateHumidity } from '../plantsRepo'
+import {
+  deletePlant,
+  findPlantRef,
+  Humidity,
+  removeVisit,
+  savePlantInfo,
+  tanslateHumidity
+} from '../plantsRepo'
 import { date, format, timezoned } from '../dateUtils'
 import { Timestamp } from 'firebase/firestore'
 import { wateringUrgencyColor } from '../wateringInfoColors'
@@ -73,7 +80,7 @@ const daysRemaingToWater = computed(() => {
 })
 
 function handleRemoveVisit(visitId: string) {
-  if(window.confirm("Bist du sicher, dass du diesen Eintrag löschen willst?")) {
+  if (window.confirm('Bist du sicher, dass du diesen Eintrag löschen willst?')) {
     removeVisit(plantId, visitId)
   }
 }
@@ -128,24 +135,36 @@ function handleRemoveVisit(visitId: string) {
         <div v-if="waterVisits.length">
           <div>Gegossen am</div>
           <ul>
-            <li v-for="visit of waterVisits" :key="visit.id" class="flex items-center justify-between w-full">
+            <li
+              v-for="visit of waterVisits"
+              :key="visit.id"
+              class="flex items-center justify-between w-full"
+            >
               <div>
                 <p class="text-2xl mt-2">{{ format(visit.timestamp.toDate()) }}</p>
                 <p class="text-xs">Der Boden war {{ tanslateHumidity(visit.soilHumidity) }}</p>
               </div>
-              <button @click="handleRemoveVisit(visit.id)" class="text-xl text-red-500 px-1">X</button>
+              <button @click="handleRemoveVisit(visit.id)" class="text-xl text-red-500 px-1">
+                X
+              </button>
             </li>
           </ul>
         </div>
         <div v-if="nonWaterVisits.length">
           <div>Bodenfeuchtigkeit geprüft am</div>
           <ul>
-            <li v-for="visit of nonWaterVisits" :key="visit.id" class="flex items-center justify-between">
+            <li
+              v-for="visit of nonWaterVisits"
+              :key="visit.id"
+              class="flex items-center justify-between"
+            >
               <div>
                 <p class="text-2xl mt-2">{{ format(visit.timestamp.toDate()) }}</p>
                 <p class="text-xs">Der Boden war {{ tanslateHumidity(visit.soilHumidity) }}</p>
               </div>
-              <button @click="handleRemoveVisit(visit.id)" class="text-xl text-red-500 px-1">X</button>
+              <button @click="handleRemoveVisit(visit.id)" class="text-xl text-red-500 px-1">
+                X
+              </button>
             </li>
           </ul>
         </div>
