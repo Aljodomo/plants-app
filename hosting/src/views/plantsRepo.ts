@@ -232,3 +232,38 @@ export async function deletePlant(plantId: string) {
   const docRef = doc(firestore, plantColName, plantId)
   await deleteDoc(docRef)
 }
+
+export async function removeVisit(plantId: string, visitId: string) {
+  if (!visitId) {
+    throw new Error('No visit id provided')
+  }
+
+  const { docRef, plantInfo } = await findPlantById(plantId)
+
+  const visitIdx = plantInfo.visits.findIndex(visit => visit.id === visitId)
+  if(visitIdx === -1){
+    throw new Error(`No visit with id ${visitId} found for plant ${plantId}`)
+  }
+  plantInfo.visits.splice(visitIdx, 1)
+
+  await setDoc(docRef, plantInfo)
+}
+
+async function findPlantById(plantId: string) {
+  if (!plantId) {
+    throw new Error('No plant id provided' + plantId)
+  }
+
+  const docRef = doc(firestore, plantColName, plantId)
+  const docSnap = await getDoc(docRef)
+  if (docSnap.exists()) {
+    const plantInfo = docSnap.data() as PlantInfo
+    return {
+      docRef,
+      plantInfo
+    }
+  } else {
+    throw new Error('No such plant info document id: ' + plantId)
+  }
+}
+
