@@ -7,6 +7,9 @@ export function wateringUrgencyColor(plant: PlantInfo | undefined): string {
     return 'rgba(0,0,0,0)'
   }
   const waterings = plant.visits.filter((visit) => visit.wasWatered === true)
+  if (!waterings.length) {
+    return 'rgba(0,0,0,0)'
+  }
   const lastWatering = waterings[waterings.length - 1].timestamp
   if (lastWatering.seconds > plant.nextWatering.seconds) {
     return 'rgba(0,0,0,0)'
