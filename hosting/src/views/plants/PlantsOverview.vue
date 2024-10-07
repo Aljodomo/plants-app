@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onUnmounted } from 'vue'
+import {computed, onUnmounted, reactive} from 'vue'
 import { useRouter } from 'vue-router'
-import { getAllPlantsRef } from '../plantsRepo'
+import { getAllPlantsRef, type PlantInfo } from '../plantsRepo'
 import { date, timezoned } from '../dateUtils'
 import { wateringUrgencyColor } from '../wateringInfoColors'
+import dayjs from "dayjs";
 
 const router = useRouter()
 
@@ -33,41 +34,52 @@ function goToPlantPage(plantId: string) {
 function goToNewPlantPage() {
   router.push('/plants/new')
 }
+
+function nextWatering(plant: PlantInfo): string {
+  return dayjs(plant.nextWatering?.toDate()).format("DD.MM")
+}
+
+function daysLeft(plant: PlantInfo) {
+  return dayjs(plant.nextWatering?.toDate()).diff(new Date(), "days")
+}
 </script>
 
 <template>
-  <main>
-    <h1
-      class="sticky left-0 right-0 top-0 bg-f-beige text-center text-3xl font-bold shadow-xl border-solid border-b-2 border-gray-700 p-4 bg-gradient-to-br from-f-green from-50%"
+  <div class="grid gap-4 ma-4 grid-cols-2">
+    <v-card variant="outlined" hover @click="goToNewPlantPage">
+      <div class="h-full w-full flex justify-center align-center">Hinzufugen</div>
+    </v-card>
+    <v-card
+      v-for="plant of sortedPlants"
+      :key="plant.id"
+      :title="plant.name"
+      @click="goToPlantPage(plant.id)"
+      class="status-border"
+      :style="{ '--border-color': wateringUrgencyColor(plant) }"
     >
-      Mein Garten
-    </h1>
-    <div class="grid grid-cols-2 p-4 text-f-beige gap-4 overflow-scroll">
-      <div
-        class="rounded-xl p-4 h-32 flex justify-center items-center bg-f-beige border-solid border-f-green border-2"
-        @click="goToNewPlantPage"
-      >
-        <p class="text-f-green font-bold">Pflanze anlegen</p>
-      </div>
-      <div
-        v-for="plant of sortedPlants"
-        :key="plant.id"
-        class="bg-f-green rounded-xl p-4 h-32 flex flex-col justify-between"
-        :style="{
-          'background-image': `linear-gradient(to left bottom, ${wateringUrgencyColor(plant)}, rgba(255,0,0,0) 50%)`
-        }"
-        @click="goToPlantPage(plant.id)"
-      >
-        <div>{{ plant.name }}</div>
-        <div v-if="plant.nextWatering" class="w-full flex flex-col items-end">
-          <div>
-            <p class="text-sm">Gießen am</p>
-            <p>{{ date(timezoned(plant.nextWatering.toDate())) }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
+      <template v-if="plant.nextWatering" v-slot:subtitle>Giesen: {{nextWatering(plant)}} in {{daysLeft(plant)}} days</template>
+      <template v-else v-slot:subtitle>Noch nicht genug Daten</template>
+    </v-card>
+  </div>
 </template>
 
-<style></style>
+<style scoped>
+.status-border {
+  position: relative;
+  overflow: visible;
+}
+.status-border:before {
+  content: ' ';
+  position: absolute;
+  background-color: var(--border-color);
+  height: 100%;
+  left: -4px;
+  width: 4px;
+  border-radius: 2px 0 0 2px;
+  z-index: 1;
+}
+
+.status-border:hover:before {
+  z-index: 1;
+}
+</style>

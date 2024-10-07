@@ -15,4 +15,3 @@ import PlantsOverview from './PlantsOverview.vue'
     </template>
   </Suspense>
 </template>
-./PlantsOverview.vue
