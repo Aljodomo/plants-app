@@ -13,6 +13,7 @@ import {
 import { ref } from 'vue'
 import { firestore } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
+import { vi } from 'vuetify/locale'
 
 const plantColName = 'plants'
 
@@ -125,7 +126,7 @@ export async function savePlantInfo(plantId: string, plantInfo: PlantInfo) {
   })
 }
 
-export function tanslateHumidity(humidity: Humidity) {
+export function getHumidityText(humidity: Humidity) {
   switch (humidity) {
     case Humidity.WET:
       return 'Nass'
@@ -141,7 +142,7 @@ export function tanslateHumidity(humidity: Humidity) {
 export async function setVisitData(
   plantId: string,
   visitId: string,
-  data: { humidity?: Humidity; wasWatered?: boolean }
+  data: { humidity?: Humidity; wasWatered?: boolean; timestamp: Date }
 ) {
   if (!plantId) {
     throw new Error('No plant id provided')
@@ -170,6 +171,9 @@ export async function setVisitData(
     }
     if (data.wasWatered !== undefined) {
       visit.wasWatered = data.wasWatered
+    }
+    if (data.timestamp !== undefined) {
+      visit.timestamp = Timestamp.fromDate(data.timestamp)
     }
 
     await setDoc(docRef, plantInfo)

@@ -10,7 +10,7 @@ import { VCalendar } from 'vuetify/labs/components'
 
 const vuetify = createVuetify({
   theme: {
-   defaultTheme: "dark"
+    defaultTheme: 'dark'
   },
   components: {
     VCalendar
