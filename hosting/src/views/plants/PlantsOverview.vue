@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {computed, onUnmounted, reactive} from 'vue'
+import { computed, onUnmounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAllPlantsRef, type PlantInfo } from '../plantsRepo'
-import { date, timezoned } from '../dateUtils'
 import { wateringUrgencyColor } from '../wateringInfoColors'
-import dayjs from "dayjs";
+import dayjs from 'dayjs'
+import { daysLeft, nextWatering } from '../dateUtils'
 
 const router = useRouter()
 
@@ -34,14 +34,6 @@ function goToPlantPage(plantId: string) {
 function goToNewPlantPage() {
   router.push('/plants/new')
 }
-
-function nextWatering(plant: PlantInfo): string {
-  return dayjs(plant.nextWatering?.toDate()).format("DD.MM")
-}
-
-function daysLeft(plant: PlantInfo) {
-  return dayjs(plant.nextWatering?.toDate()).diff(new Date(), "days")
-}
 </script>
 
 <template>
@@ -57,7 +49,10 @@ function daysLeft(plant: PlantInfo) {
       class="status-border"
       :style="{ '--border-color': wateringUrgencyColor(plant) }"
     >
-      <template v-if="plant.nextWatering" v-slot:subtitle>Giesen: {{nextWatering(plant)}} in {{daysLeft(plant)}} days</template>
+      <template v-if="plant.nextWatering" v-slot:subtitle
+        >Giesen: {{ nextWatering(plant) }}
+        <div>in {{ daysLeft(plant) }} tagen</div></template
+      >
       <template v-else v-slot:subtitle>Noch nicht genug Daten</template>
     </v-card>
   </div>

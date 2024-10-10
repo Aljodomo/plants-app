@@ -6,25 +6,25 @@
         class="bg-blue-600 text-white rounded-lg px-8 py-5 w-72"
         @click="handleSelectHumidity(Humidity.WET)"
       >
-        {{ tanslateHumidity(Humidity.WET) }}
+        {{ getHumidityText(Humidity.WET) }}
       </button>
       <button
         class="bg-blue-400 text-white rounded-lg px-8 py-5 w-72"
         @click="handleSelectHumidity(Humidity.MOIST)"
       >
-        {{ tanslateHumidity(Humidity.MOIST) }}
+        {{ getHumidityText(Humidity.MOIST) }}
       </button>
       <button
         class="bg-green-600 text-white rounded-lg px-8 py-5 w-72"
         @click="handleSelectHumidity(Humidity.DRY)"
       >
-        {{ tanslateHumidity(Humidity.DRY) }}
+        {{ getHumidityText(Humidity.DRY) }}
       </button>
       <button
         class="bg-gray-400 text-white rounded-lg px-8 py-5 w-72"
         @click="handleSelectHumidity(Humidity.VERY_DRY)"
       >
-        {{ tanslateHumidity(Humidity.VERY_DRY) }}
+        {{ getHumidityText(Humidity.VERY_DRY) }}
       </button>
     </main>
   </div>
@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { Humidity, setVisitData, tanslateHumidity } from '../plantsRepo'
+import { Humidity, setVisitData, getHumidityText } from '../plantsRepo'
 
 const route = useRoute()
 const router = useRouter()
