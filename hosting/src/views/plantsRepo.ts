@@ -142,7 +142,7 @@ export function getHumidityText(humidity: Humidity) {
 export async function setVisitData(
   plantId: string,
   visitId: string,
-  data: { humidity?: Humidity; wasWatered?: boolean; timestamp: Date }
+  data: { humidity?: Humidity; wasWatered?: boolean; timestamp?: Date }
 ) {
   if (!plantId) {
     throw new Error('No plant id provided')
