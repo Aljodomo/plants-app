@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
+import { browserLocalPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { auth } from '@/views/firebase'

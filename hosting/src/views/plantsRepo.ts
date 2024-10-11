@@ -13,7 +13,6 @@ import {
 import { ref } from 'vue'
 import { firestore } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
-import { vi } from 'vuetify/locale'
 
 const plantColName = 'plants'
 

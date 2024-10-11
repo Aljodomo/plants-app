@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { Humidity, setVisitData, getHumidityText } from '../plantsRepo'
+import { getHumidityText, Humidity, setVisitData } from '../plantsRepo'
 
 const route = useRoute()
 const router = useRouter()
