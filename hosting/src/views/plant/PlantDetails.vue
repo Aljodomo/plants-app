@@ -4,19 +4,14 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   deletePlant,
   findPlantRef,
-  Humidity,
-  humidityValues,
-  removeVisit,
-  savePlantInfo,
   getHumidityText,
-  type Visit
+  Humidity,
+  removeVisit,
+  savePlantInfo
 } from '../plantsRepo'
-import { date, daysLeft, format, getNextWateringText, nextWatering, timezoned } from '../dateUtils'
-import { Timestamp } from 'firebase/firestore'
-import { wateringUrgencyColor } from '../wateringInfoColors'
+import { daysLeft, getNextWateringText } from '../dateUtils'
 import PopupEditor from '@/views/plant/PopupEditor.vue'
 import dayjs from 'dayjs'
-import { da, vi } from 'vuetify/locale'
 
 const route = useRoute()
 const router = useRouter()

@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { createPlant, Humidity, getHumidityText } from '../plantsRepo'
+import { createPlant, getHumidityText, Humidity } from '../plantsRepo'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, onUnmounted, reactive } from 'vue'
+import { computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAllPlantsRef, type PlantInfo } from '../plantsRepo'
+import { getAllPlantsRef } from '../plantsRepo'
 import { wateringUrgencyColor } from '../wateringInfoColors'
-import dayjs from 'dayjs'
 import { daysLeft, nextWatering } from '../dateUtils'
 
 const router = useRouter()
