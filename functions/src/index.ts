@@ -150,7 +150,7 @@ function predictNextWatering(plant: PlantInfo): Timestamp | null {
   const avg = calcTimeDeltaAvg(
     waterings,
     // weight visits less which did not water the plant at the prefered soil humidity
-    (v) => 1 / 1 + calcHumidityDelta(v.soilHumidity, plant.preferedHumidy)
+    (v) => 1 / (1 + calcHumidityDelta(v.soilHumidity, plant.preferedHumidy))
   );
 
   nextWatering = Timestamp.fromMillis(
