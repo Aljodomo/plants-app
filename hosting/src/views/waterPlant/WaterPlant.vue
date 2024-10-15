@@ -52,7 +52,7 @@ function openDatePicker() {
   isDatePickerOpen.value = true
 }
 
-let timeout = -1
+let timeout: any = null
 
 addVisit(plantId)
   .then((newVisitId) => {
