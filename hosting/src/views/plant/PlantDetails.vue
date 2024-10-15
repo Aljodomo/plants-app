@@ -63,19 +63,6 @@ function handleRemoveVisit(visitId: string) {
   }
 }
 
-const daysSinceLastWatering = computed(() => {
-  const vis = plantInfo.value.visits
-    .slice()
-    .reverse()
-    .find((v) => v.wasWatered)
-  if (!vis) return -1
-  return Math.round(dayjs().diff(vis?.timestamp.toDate(), 'hours') / 24)
-})
-
-const daysUntilNextWatering = computed(() =>
-  dayjs(plantInfo.value.nextWatering?.toDate()).diff(new Date(), 'days')
-)
-
 const timelineEntries = computed(() => {
   const visits = plantInfo.value.visits.slice().reverse()
 
