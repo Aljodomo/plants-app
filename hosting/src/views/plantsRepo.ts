@@ -34,6 +34,7 @@ export interface PlantInfo {
   id: string
   name: string
   visits: Visit[]
+  imageUrl?: string
   nextWatering?: Timestamp
   preferedHumidy?: Humidity
 }
@@ -120,8 +121,7 @@ export async function getAllPlantsRef() {
 export async function savePlantInfo(plantId: string, plantInfo: PlantInfo) {
   const docRef = doc(firestore, plantColName, plantId)
   return await updateDoc(docRef, {
-    name: plantInfo.name,
-    preferedHumidy: plantInfo.preferedHumidy
+    ...plantInfo
   })
 }
 

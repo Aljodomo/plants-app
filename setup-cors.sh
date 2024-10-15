@@ -1,0 +1,1 @@
+gsutil cors set cors.json gs://plants-app-c271d.appspot.com

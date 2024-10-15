@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   deletePlant,
@@ -12,6 +12,8 @@ import {
 import { daysLeft, getNextWateringText } from '../dateUtils'
 import PopupEditor from '@/views/plant/PopupEditor.vue'
 import dayjs from 'dayjs'
+import { deletePlantImage, uploadPlantImage } from '@/views/imageRepo'
+import { cachedBlobUrl } from '@/views/fileCache'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,7 +22,7 @@ const plantId = route.params.id as string
 
 const { ref: plantInfo, unsub } = await findPlantRef(plantId)
 
-let timeout: number | null = null
+let timeout: any | null = null
 
 async function save(skipTimeout: boolean = false) {
   let time = 1000
@@ -98,20 +100,78 @@ function getTime() {
 }
 
 setInterval(() => (currentTime.value = getTime()), 1000)
+
+const image = ref<File | null>(null)
+
+watchEffect(async () => {
+  if (image.value) {
+    await uploadPlantImage(plantInfo.value, image.value)
+  }
+})
+
+const cachedImageUrl = ref<string>()
+const imageUrl = computed(() => plantInfo.value.imageUrl)
+watchEffect(async () => (cachedImageUrl.value = await cachedBlobUrl(imageUrl.value)))
+
+const isUploading = ref(false)
+
+function openFileDialog() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/*'
+  input.multiple = false
+  input.hidden = true
+
+  input.onchange = async (event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (file) {
+      isUploading.value = true
+      await uploadPlantImage(plantInfo.value, file).finally(() => (isUploading.value = false))
+    }
+  }
+
+  input.click()
+  input.remove()
+}
+
+function deleteImage() {
+  if (window.confirm('Bist du sicher, dass du dieses Bild loschen willst?')) {
+    deletePlantImage(plantInfo.value)
+  }
+}
 </script>
 
 <template>
   <v-card class="m-4">
-    <template v-slot:title>
-      <PopupEditor type="textarea" v-model="plantInfo.name" @save="save">
-        {{ plantInfo.name }}
-      </PopupEditor>
-    </template>
-    <template v-if="plantInfo.nextWatering" v-slot:subtitle>
-      Giesen am {{ getNextWateringText(plantInfo) }}</template
-    >
-
-    <template v-slot:text>
+    <v-img v-if="plantInfo.imageUrl" height="25%" :src="cachedImageUrl" cover class="relative">
+      <v-toolbar color="transparent">
+        <template v-slot:append>
+          <v-btn
+            icon="mdi-trash-can-outline"
+            variant="text"
+            class="bg-black"
+            @click="deleteImage"
+          ></v-btn>
+        </template>
+      </v-toolbar>
+    </v-img>
+    <v-card-text>
+      <div class="flex justify-between items-center mb-4">
+        <PopupEditor type="textarea" v-model="plantInfo.name" @save="save">
+          <div class="text-h5">{{ plantInfo.name }}</div>
+        </PopupEditor>
+        <v-btn
+          v-if="!plantInfo.imageUrl"
+          class="ml-auto"
+          icon="mdi-camera-plus-outline"
+          :loading="isUploading"
+          @click="openFileDialog"
+        ></v-btn>
+      </div>
+      <div v-if="plantInfo.nextWatering" class="text-subtitle mb-4">
+        Giesen am {{ getNextWateringText(plantInfo) }}
+      </div>
       <v-select
         label="Boden"
         v-model="plantInfo.preferedHumidy"
@@ -164,7 +224,7 @@ setInterval(() => (currentTime.value = getTime()), 1000)
           </div>
         </v-timeline-item>
       </v-timeline>
-    </template>
+    </v-card-text>
   </v-card>
 </template>
 
