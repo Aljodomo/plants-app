@@ -165,7 +165,7 @@ setInterval(() => (currentTime.value = getTime()), 1000)
                 @{{ visit.timestamp }}
               </div>
               <div>Der Boden war {{ visit.soil }}</div>
-              <div v-if="visit.wasWatered">Vor {{ visit.diffToNow }} Tagen</div>
+              <div>Vor {{ visit.diffToNow }} Tagen</div>
             </div>
             <v-btn
               class="self-start"
