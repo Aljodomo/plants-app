@@ -7,6 +7,7 @@ import router from './router'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { VCalendar } from 'vuetify/labs/components'
+import '@mdi/font/css/materialdesignicons.css'
 
 const vuetify = createVuetify({
   theme: {
@@ -14,6 +15,9 @@ const vuetify = createVuetify({
   },
   components: {
     VCalendar
+  },
+  icons: {
+    defaultSet: 'mdi'
   }
 })
 
