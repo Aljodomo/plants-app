@@ -34,7 +34,7 @@ export interface PlantInfo {
   id: string
   name: string
   visits: Visit[]
-  imageUrl?: string
+  imageUrl?: string | null
   nextWatering?: Timestamp
   preferedHumidy?: Humidity
 }
