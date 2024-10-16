@@ -2,7 +2,7 @@ async function getFileCache() {
   return await window.caches.open('plants-app-files')
 }
 
-export async function cachedBlobUrl(url?: string): Promise<string | undefined> {
+export async function cachedBlobUrl(url?: string | null): Promise<string | undefined> {
   if (!url) return undefined
   const request = new URL(url)
   const fileCache = await getFileCache()
