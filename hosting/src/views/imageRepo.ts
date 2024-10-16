@@ -26,6 +26,6 @@ export async function uploadPlantImage(plantInfo: PlantInfo, file: File) {
 export async function deletePlantImage(plantInfo: PlantInfo) {
   const ref = getImageRef(plantInfo.id)
   await deleteObject(ref)
-  delete plantInfo.imageUrl
+  plantInfo.imageUrl = null
   await savePlantInfo(plantInfo.id, plantInfo)
 }
