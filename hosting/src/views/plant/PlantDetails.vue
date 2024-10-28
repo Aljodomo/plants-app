@@ -143,8 +143,8 @@ function deleteImage() {
 </script>
 
 <template>
-  <v-card class="m-4">
-    <v-img v-if="plantInfo.imageUrl" height="25%" :src="cachedImageUrl" cover class="relative">
+  <v-card class="m-4 overflow-visible">
+    <v-img v-if="plantInfo.imageUrl" height="20vh" :src="cachedImageUrl" cover class="relative">
       <v-toolbar color="transparent">
         <template v-slot:append>
           <v-btn
