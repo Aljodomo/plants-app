@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref, watchEffect} from 'vue'
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   deletePlant,
@@ -14,7 +14,7 @@ import PopupEditor from '@/views/plant/PopupEditor.vue'
 import dayjs from 'dayjs'
 import { deletePlantImage, uploadPlantImage } from '@/views/imageRepo'
 import { cachedBlobUrl } from '@/views/fileCache'
-import gsap from "gsap"
+import gsap from 'gsap'
 
 const route = useRoute()
 const router = useRouter()
@@ -151,21 +151,28 @@ const Timeings = {
   relaxed: 0.5,
   medium: 0.3,
   fast: 0.2,
-  veryFast: 0.1,
+  veryFast: 0.1
 }
 
-// onMounted(() => {
-//   gsap.timeline().from("#card", {
-//     duration: Timeings.relaxed,
-//     x: 300,
-//     ease: "power4.out",
-//   })
-// })
+onMounted(() => {
+  // gsap.timeline().from("#card", {
+  //   duration: Timeings.relaxed,
+  //   x: 300,
+  //   ease: "power4.out",
+  // })
+})
 </script>
 
 <template>
   <v-card id="card" class="m-4">
-    <v-img id="img" v-if="plantInfo.imageUrl" height="20vh" :src="cachedImageUrl" cover class="relative">
+    <v-img
+      id="img"
+      v-if="plantInfo.imageUrl"
+      height="20vh"
+      :src="cachedImageUrl"
+      cover
+      class="relative"
+    >
       <v-toolbar color="transparent">
         <template v-slot:append>
           <v-btn
