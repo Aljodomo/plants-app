@@ -10,7 +10,23 @@ export default defineConfig({
   plugins: [
     vue(),
     vuetify({ autoImport: true }),
-    VitePWA({ registerType: 'autoUpdate' })
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['flower.svg'],
+      manifest: {
+        name: 'Blattgrün',
+        short_name: 'Blattgrün',
+        description: 'Behalte einen grünen Daumen',
+        theme_color: '#ffffff',
+        icons: [
+          {
+            src: 'flower.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any'
+          },
+        ]
+      } })
   ],
   resolve: {
     alias: {
