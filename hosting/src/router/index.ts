@@ -27,7 +27,7 @@ const router = createRouter({
     },
     {
       path: '/plants/:id',
-      name: "plant",
+      name: 'plant',
       component: PlantDetailsLoader
     },
     {
