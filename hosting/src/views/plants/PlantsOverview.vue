@@ -39,7 +39,7 @@ const plants = computed(() =>
     .map((it) => ({
       id: it.id,
       name: it.name,
-      daysSinceLastVisit: daysToToday(it.visits.slice().reverse()[0].timestamp),
+      daysSinceLastVisit: daysToToday(it.visits.slice().reverse()[0]?.timestamp),
       wateringStatusColor: wateringUrgencyColor(it),
       daysUntilNextWatering: daysFromToday(it.nextWatering)
     }))
