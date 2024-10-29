@@ -51,7 +51,7 @@ function handleWater() {
   router.push(router.currentRoute.value.path + '/waterPlant')
 }
 
-function handleDelete() {
+function handleDeletePlant() {
   const confirmed = confirm(`Möchtest du die Pflanze ${plantInfo.value.name} wirklich löschen?`)
 
   if (confirmed) {
@@ -142,11 +142,7 @@ function deleteImage() {
   }
 }
 
-function goToHome() {
-  router.push('/plants')
-}
-
-const Timeings = {
+const Timings = {
   slow: 1,
   relaxed: 0.5,
   medium: 0.3,
@@ -155,11 +151,16 @@ const Timeings = {
 }
 
 onMounted(() => {
-  // gsap.timeline().from("#card", {
-  //   duration: Timeings.relaxed,
-  //   x: 300,
-  //   ease: "power4.out",
-  // })
+  gsap.from(".ani-3", {
+    duration: Timings.medium,
+    x: 30,
+    opacity: 0,
+    stagger: {
+      amount: 0.1 * plantInfo.value.visits.length,
+      from: "start",
+      ease: "power1.in" // Eases the stagger timing itself
+    },
+  })
 })
 </script>
 
@@ -179,7 +180,7 @@ onMounted(() => {
             icon="mdi-trash-can-outline"
             variant="text"
             class="bg-black"
-            @click="deleteImage"
+            @click="handleDeletePlant"
           ></v-btn>
         </template>
       </v-toolbar>
@@ -235,12 +236,12 @@ onMounted(() => {
         >
           <div class="w-full flex justify-between">
             <div class="mb-4">
-              <div class="font-weight-normal">
+              <div class="font-weight-normal ani-3">
                 <strong>{{ visit.text }}</strong>
                 @{{ visit.timestamp }}
               </div>
-              <div>Der Boden war {{ visit.soil }}</div>
-              <div>Vor {{ visit.diffToNow }} Tagen</div>
+              <div class="ani-3">Der Boden war {{ visit.soil }}</div>
+              <div class="ani-3">Vor {{ visit.diffToNow }} Tagen</div>
             </div>
             <v-btn
               class="self-start"
