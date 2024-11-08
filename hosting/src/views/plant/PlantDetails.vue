@@ -142,26 +142,6 @@ function deleteImage() {
   }
 }
 
-const Timings = {
-  slow: 1,
-  relaxed: 0.5,
-  medium: 0.3,
-  fast: 0.2,
-  veryFast: 0.1
-}
-
-onMounted(() => {
-  gsap.from('.ani-3', {
-    duration: Timings.medium,
-    x: 30,
-    opacity: 0,
-    stagger: {
-      amount: 0.1 * plantInfo.value.visits.length,
-      from: 'start',
-      ease: 'power1.in' // Eases the stagger timing itself
-    }
-  })
-})
 </script>
 
 <template>
