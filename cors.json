@@ -1,7 +1,0 @@
-[
-  {
-    "origin": ["https://plants-app-c271d.web.app", "http://localhost:5173/"],
-    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "maxAgeSeconds": 3600
-  }
-]

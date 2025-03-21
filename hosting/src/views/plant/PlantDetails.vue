@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import {computed, onMounted, onUnmounted, ref, watch, watchEffect} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   deletePlant,
@@ -14,7 +14,6 @@ import PopupEditor from '@/views/plant/PopupEditor.vue'
 import dayjs from 'dayjs'
 import { deletePlantImage, uploadPlantImage } from '@/views/imageRepo'
 import { cachedBlobUrl } from '@/views/fileCache'
-import gsap from 'gsap'
 
 const route = useRoute()
 const router = useRouter()
@@ -142,6 +141,25 @@ function deleteImage() {
   }
 }
 
+async function handleIdentifyClick() {
+
+  const res = await fetch("http://127.0.0.1:5001/plants-app-c271d/us-central1/identifyPlant?" + new URLSearchParams({
+    apiKey: import.meta.env.VITE_MY_API_KEY
+  }), {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify(
+        {
+          images : [plantInfo.value.imageUrl],
+        }
+    )
+  }).then(res => res.json())
+
+  console.log(res)
+}
+
 </script>
 
 <template>
@@ -157,11 +175,17 @@ function deleteImage() {
       <v-toolbar color="transparent">
         <template v-slot:append>
           <v-btn
+              variant="text"
+              class="bg-black"
+              @click="handleIdentifyClick"
+          >Identify</v-btn>
+          <v-btn
             icon="mdi-trash-can-outline"
             variant="text"
             class="bg-black"
             @click="handleDeletePlant"
           ></v-btn>
+
         </template>
       </v-toolbar>
     </v-img>

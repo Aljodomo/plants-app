@@ -5,10 +5,14 @@ import {defineString} from "firebase-functions/params";
 import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 import {onSchedule} from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
+import {onIdentifyPlantRequest} from "./plantnet-http";
 
 initializeApp();
 
 const DEFAULT_TELEGRAM_CHAT_ID = defineString("DEFAULT_TELEGRAM_CHAT_ID");
+
+export const identifyPlant = onIdentifyPlantRequest;
+// export const identifyPlantByBlob = onIdentifyPlantByBlobRequest;
 
 export enum Humidity {
   WET = "WET",

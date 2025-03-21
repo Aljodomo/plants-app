@@ -11,7 +11,7 @@ function getImageRef(imageName: string) {
   return getRef(`images/${imageName}`)
 }
 
-async function uploadImage(imageName: string, file: File) {
+export async function uploadImage(imageName: string, file: Blob) {
   const ref = getImageRef(imageName)
   return uploadBytes(ref, file)
 }

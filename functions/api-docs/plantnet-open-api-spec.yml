@@ -1,0 +1,334 @@
+openapi: 3.1.0
+info:
+  title: "My Pl@ntNet API"
+  version: "2.2.1"
+servers:
+  - url: "https://my-api.plantnet.org"
+    description: "Production server"
+
+paths:
+  /v2/identify/{project}:
+    parameters:
+      - name: "project"
+        in: path
+        description: "Referential in which to search the plant (use one of the available projects or 'all' to get the results of the most relevant project)"
+        required: true
+        schema:
+          type: string
+          default: "all"
+    get:
+      summary: "Identification service"
+      operationId: "getV2IdentifyProject"
+      description: "Get identification results from images URLs"
+      parameters:
+        - name: "images"
+          in: query
+          description: "Images URLs (all images must respresent the same plant) [max: 5 images]"
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uri
+              pattern: "^https?://.*$"
+            minItems: 1
+            maxItems: 5
+        - name: "organs"
+          in: query
+          description: "Organs associated to images (must contains one of: leaf, flower, fruit, bark, auto. Could contains: habit, other) [max 5 organs and organs.length must be equal to images.length]"
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [leaf, flower, fruit, bark, auto]
+            minItems: 1
+            maxItems: 5
+        - name: "include-related-images"
+          in: query
+          description: "If true, for each probable species, the most similar images will be returned"
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: "no-reject"
+          in: query
+          description: "Disables 'no result' in case of reject class match"
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: "nb-results"
+          in: query
+          description: "Max. number of species in identification results − a higher number increases response time"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+        - name: "lang"
+          in: query
+          description: "i18n (default: en)"
+          required: false
+          schema:
+            type: string
+            default: "en"
+            enum: [en, fr, es, pt, de, it, ar, cs, nl, sk, zh, ru, tr, pl, uk, he, el, fi, id, ms, ca, ja, hu, hr, da, ro, bg, nb, sl, sv, et, eu, ur, ml, cy, ku, gl, eo, sat, zh-tw, pt-br, hi, de-at, sr, zh-hant, bn, fa, be, oc, lt, en-au, br]
+        - name: "type"
+          in: query
+          description: "Model type: use 'kt' for new POWO / WGSRPD based floras and identification engine (2023+), 'legacy' for legacy floras and identification engine (2022)"
+          required: false
+          schema:
+            type: string
+            enum: [kt, legacy]
+        - name: "api-key"
+          in: query
+          description: "Your private API key"
+          required: false
+          schema:
+            type: string
+        - name: "authenix-access-token"
+          in: query
+          description: "Authenix access token − Authenix is an alternative way of authenticating. Use api-key unless you know what this is."
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationResult'
+        '400':
+          description: "Bad Request"
+        '401':
+          description: "Unauthorized"
+        '404':
+          description: "Species Not Found"
+        '414':
+          description: "URI Too Long"
+        '429':
+          description: "Too Many Requests"
+        '500':
+          description: "Internal Server Error"
+
+    post:
+      summary: "Identification service"
+      operationId: "postV2IdentifyProject"
+      description: "This service allows plant identification (one request => one plant)\nMime: image/jpeg or image/png\nMax POST size: 52428800 bytes"
+      parameters:
+        - name: "include-related-images"
+          in: query
+          description: "If true, for each probable species, the most similar images will be returned"
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: "no-reject"
+          in: query
+          description: "Disables 'no result' in case of reject class match"
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: "nb-results"
+          in: query
+          description: "Max. number of species in identification results − a higher number increases response time"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+        - name: "lang"
+          in: query
+          description: "i18n (default: en)"
+          required: false
+          schema:
+            type: string
+            default: "en"
+            enum: [en, fr, es, pt, de, it, ar, cs, nl, sk, zh, ru, tr, pl, uk, he, el, fi, id, ms, ca, ja, hu, hr, da, ro, bg, nb, sl, sv, et, eu, ur, ml, cy, ku, gl, eo, sat, zh-tw, pt-br, hi, de-at, sr, zh-hant, bn, fa, be, oc, lt, en-au, br]
+        - name: "type"
+          in: query
+          description: "Model type: use 'kt' for new POWO / WGSRPD based floras and identification engine (2023+), 'legacy' for legacy floras and identification engine (2022)"
+          required: false
+          schema:
+            type: string
+            enum: [kt, legacy]
+        - name: "api-key"
+          in: query
+          description: "Your private API key"
+          required: false
+          schema:
+            type: string
+        - name: "authenix-access-token"
+          in: query
+          description: "Authenix access token − Authenix is an alternative way of authenticating. Use api-key unless you know what this is."
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  minItems: 1
+                  maxItems: 5
+                organs:
+                  type: array
+                  items:
+                    type: string
+                    enum: [leaf, flower, fruit, bark, auto]
+                  minItems: 1
+                  maxItems: 5
+              required:
+                - images
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationResult'
+        '400':
+          description: "Bad Request"
+        '401':
+          description: "Unauthorized"
+        '404':
+          description: "Species Not Found"
+        '413':
+          description: "Payload Too Large"
+        '414':
+          description: "URI Too Long"
+        '415':
+          description: "Unsupported Media Type"
+        '429':
+          description: "Too Many Requests"
+        '500':
+          description: "Internal Server Error"
+
+components:
+  schemas:
+    IdentificationResult:
+      type: object
+      properties:
+        query:
+          type: object
+          properties:
+            project:
+              type: string
+            images:
+              type: array
+              items:
+                type: string
+            organs:
+              type: array
+              items:
+                type: string
+            includeRelatedImages:
+              type: boolean
+            noReject:
+              type: boolean
+        language:
+          type: string
+        preferredReferential:
+          type: string
+        switchToProject:
+          type: string
+        bestMatch:
+          type: string
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              score:
+                type: number
+              species:
+                type: object
+                properties:
+                  scientificNameWithoutAuthor:
+                    type: string
+                  scientificNameAuthorship:
+                    type: string
+                  scientificName:
+                    type: string
+                  genus:
+                    type: object
+                    properties:
+                      scientificNameWithoutAuthor:
+                        type: string
+                      scientificNameAuthorship:
+                        type: string
+                      scientificName:
+                        type: string
+                  family:
+                    type: object
+                    properties:
+                      scientificNameWithoutAuthor:
+                        type: string
+                      scientificNameAuthorship:
+                        type: string
+                      scientificName:
+                        type: string
+                  commonNames:
+                    type: array
+                    items:
+                      type: string
+              images:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    organ:
+                      type: string
+                    author:
+                      type: string
+                    license:
+                      type: string
+                    date:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: integer
+                        string:
+                          type: string
+                    citation:
+                      type: string
+                    url:
+                      type: object
+                      properties:
+                        o:
+                          type: string
+                        m:
+                          type: string
+                        s:
+                          type: string
+              gbif:
+                type: object
+                properties:
+                  id:
+                    type: integer
+              powo:
+                type: object
+                properties:
+                  id:
+                    type: string
+              iucn:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  category:
+                    type: string
+        remainingIdentificationRequests:
+          type: integer
+        version:
+          type: string

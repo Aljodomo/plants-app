@@ -1,0 +1,162 @@
+openapi: 3.0.0
+info:
+  title: Plant.id API
+  version: '3.0.0'
+  description: |
+    Plant.id is a machine learning-based service to identify indoor plants, wildflowers, trees, grasses, 
+    and other plant species from images. Additionally, Plant.id can evaluate the health of plants and 
+    detect various diseases, vermins or pests.
+  
+servers:
+  - url: https://api.plant.id/v3
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Api-Key
+  
+  schemas:
+    IdentificationRequest:
+      type: object
+      required:
+        - images
+      properties:
+        images:
+          type: array
+          items:
+            type: string
+          description: |
+            List of image strings either as Base64 encoded images or public URLs
+          minItems: 1
+        latitude:
+          type: number
+          format: float
+          description: Geographic coordinate to increase identification accuracy
+        longitude:
+          type: number
+          format: float
+          description: Geographic coordinate to increase identification accuracy
+        similar_images:
+          type: boolean
+          description: If true, returns similar images for each suggestion
+        custom_id:
+          type: integer
+          description: Unique identifier for accessing identification results
+        datetime:
+          type: string
+          format: date-time
+          description: Date when images were taken (ISO format)
+        health:
+          type: string
+          enum: [only, auto, all]
+          description: |
+            Controls health assessment in response:
+            * only - only health assessment
+            * auto - health assessment included if plant is diseased
+            * all - both species classification and health assessment
+        suggestion_filter:
+          type: object
+          properties:
+            classification:
+              type: string
+              description: Filter to restrict output to specific classes
+          example:
+            classification: "houseplant OR continent__europe"
+        classification_level:
+          type: string
+          enum: [species, all, genus]
+          default: species
+          description: |
+            Taxonomy level for identification:
+            * species - genus and species (default)
+            * all - genus, species and infraspecies
+            * genus - only genus
+        classification_raw:
+          type: boolean
+          description: If true, keeps suggestions in 3 original taxonomy levels
+
+    IdentificationResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: Unique identifier for accessing identification results
+        result:
+          type: object
+          properties:
+            is_plant:
+              type: object
+              properties:
+                binary:
+                  type: boolean
+                  description: False if images likely don't contain a plant
+                probability:
+                  type: number
+                  format: float
+                  description: Probability that images contain a plant
+            classification:
+              type: object
+              properties:
+                suggestions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Immutable taxon ID
+                      name:
+                        type: string
+                        description: Taxon name (may change over time)
+                      probability:
+                        type: number
+                        format: float
+                        description: Confidence level of suggestion
+                      similar_images:
+                        type: array
+                        items:
+                          type: object
+                          description: Similar representative images if requested
+
+paths:
+  /identification:
+    post:
+      summary: Create a new plant identification
+      description: |
+        Identify plants from provided images. Supports both JSON and multipart/form-data requests.
+      operationId: createIdentification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdentificationRequest'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Image files to identify
+                # Other properties same as JSON request
+      responses:
+        '200':
+          description: Successful identification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationResponse'
+        '400':
+          description: Invalid request
+        '401':
+          description: Invalid API key
+        '429':
+          description: Too many requests

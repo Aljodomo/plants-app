@@ -1,0 +1,154 @@
+openapi: 3.1.0
+info:
+  title: "My API"
+  version: "0.0.1"
+servers:
+  - url: "http://127.0.0.1:5001/plants-app-c271d/us-central1"
+
+paths:
+  /identifyPlant:
+    post:
+      operationId: "identifyPlant"
+      parameters:
+        - name: "apiKey"
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationResult'
+
+components:
+  schemas:
+    IdentificationResult:
+      type: object
+      properties:
+        query:
+          type: object
+          properties:
+            project:
+              type: string
+            images:
+              type: array
+              items:
+                type: string
+            organs:
+              type: array
+              items:
+                type: string
+            includeRelatedImages:
+              type: boolean
+            noReject:
+              type: boolean
+        language:
+          type: string
+        preferredReferential:
+          type: string
+        switchToProject:
+          type: string
+        bestMatch:
+          type: string
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              score:
+                type: number
+              species:
+                type: object
+                properties:
+                  scientificNameWithoutAuthor:
+                    type: string
+                  scientificNameAuthorship:
+                    type: string
+                  scientificName:
+                    type: string
+                  genus:
+                    type: object
+                    properties:
+                      scientificNameWithoutAuthor:
+                        type: string
+                      scientificNameAuthorship:
+                        type: string
+                      scientificName:
+                        type: string
+                  family:
+                    type: object
+                    properties:
+                      scientificNameWithoutAuthor:
+                        type: string
+                      scientificNameAuthorship:
+                        type: string
+                      scientificName:
+                        type: string
+                  commonNames:
+                    type: array
+                    items:
+                      type: string
+              images:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    organ:
+                      type: string
+                    author:
+                      type: string
+                    license:
+                      type: string
+                    date:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: integer
+                        string:
+                          type: string
+                    citation:
+                      type: string
+                    url:
+                      type: object
+                      properties:
+                        o:
+                          type: string
+                        m:
+                          type: string
+                        s:
+                          type: string
+              gbif:
+                type: object
+                properties:
+                  id:
+                    type: integer
+              powo:
+                type: object
+                properties:
+                  id:
+                    type: string
+              iucn:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  category:
+                    type: string
+        remainingIdentificationRequests:
+          type: integer
+        version:
+          type: string

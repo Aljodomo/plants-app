@@ -14,7 +14,11 @@
     "style": "prettier --write src/",
     "format": "npm run lint && npm run style",
     "deploy-preview": "firebase hosting:channel:deploy new-feature --expires 1d",
-    "update-firebase": "npx npm-check-updates firebase -u && npm i"
+    "update-firebase": "npx npm-check-updates firebase -u && npm i",
+    "gen-types-perenual": "npx @openapitools/openapi-generator-cli generate -g typescript-fetch -i api-docs/perenual-openapi-spec.yml --output generated/perenual",
+    "gen-types-plantnet": "npx @openapitools/openapi-generator-cli generate -g typescript-fetch -i api-docs/plantnet-open-api-spec.yml --output generated/plantnet",
+    "gen-types-my-api": "npx @openapitools/openapi-generator-cli generate -g typescript-fetch -i api-docs/my-open-api-spec.yml --output generated/my-api",
+    "gen-types": "npm run gen-types-perenual && npm run gen-types-plantnet && npm run gen-types-my-api"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -26,7 +30,7 @@
     "pinia": "^2.1.7",
     "uuid": "^9.0.1",
     "vite-plugin-vuetify": "^2.0.4",
-    "vue": "^3.4.15",
+    "vue": "^3.5.12",
     "vue-router": "^4.2.5",
     "vuetify": "^3.7.2"
   },
@@ -49,6 +53,6 @@
     "typescript": "~5.3.0",
     "vite": "^5.0.11",
     "vite-plugin-pwa": "^0.20.5",
-    "vue-tsc": "^1.8.27"
+    "vue-tsc": "^2.1.10"
   }
 }

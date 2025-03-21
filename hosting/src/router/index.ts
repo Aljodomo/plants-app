@@ -7,6 +7,7 @@ import PlantsOverviewLoader from '@/views/plants/PlantsOverviewLoader.vue'
 import NewPlant from '@/views/NewPlant/NewPlant.vue'
 import LoginPage from '@/views/login/LoginPage.vue'
 import { auth } from '@/views/firebase'
+import ScanPlant from "@/views/scan-plant/ScanPlant.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: '/plants',
       name: 'plants',
       component: PlantsOverviewLoader
+    },
+    {
+      path: '/scan',
+      name: 'scan',
+      component: ScanPlant
     },
     {
       path: '/plants/new',
